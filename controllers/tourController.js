@@ -1,5 +1,6 @@
 const Tour = require('../models/tourModel');
-const { filterReservedQueryVals } = require('../utils/common');
+// const { filterReservedQueryVals } = require('../utils/common');
+const APIQuery = require('../utils/apiQuery');
 // const tours = JSON.parse(
 //   fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`)
 // );
@@ -14,8 +15,8 @@ exports.aliasTopTours = (req, res, next) => {
 exports.getAllTours = async (req, res) => {
   try {
     // 1) FILTERING
-    console.log('QUERY::', req.query);
-    const queryObj = filterReservedQueryVals({ ...req.query });
+    // console.log('QUERY::', req.query);÷
+    // const queryObj = filterReservedQueryVals({ ...req.query });
     // Note to self:  <collection_schema>.find always returns the Query Object
     // so u can cahin any other Query methods defined on the query prototypes
     // BUt when u do await , it executes that query
@@ -23,43 +24,19 @@ exports.getAllTours = async (req, res) => {
     // let query = Tour.find(queryObj);
 
     // for advanced query
-    let query = Tour.find(queryObj);
+    // let query = Tour.find(queryObj);
     // string : ?difficulty=easy&duration=5&page=2&ratingsAverage[gte]=4.7
 
     // 2) SORT
     // ascending : 127.0.0.1:3000/api/v1/tours?sort=price
     // descending: 127.0.0.1:3000/api/v1/tours?sort=-price
     //127.0.0.1:3000/api/v1/tours?sort=price,-ratingsAverage&price=1497
-    if (req.query.sort) {
-      const sortBy = req.query.sort.split(',').join(' ');
-      query = query.sort(sortBy);
-    } else {
-      query = query.sort('-createdAt');
-    }
-
-    // limiting fields
-    if (req.query.fields) {
-      const fields = req.query.fields.split(',').join(' ');
-      query = query.select(fields);
-    } else {
-      query = query.select('-__v');
-    }
-
-    // pagination
-
-    const page = req.query.page * 1 || 1;
-    const limit = req.query.limit * 1 || 100;
-    const skip = (page - 1) * limit;
-    query = query.skip(skip).limit(limit);
-
-    if (req.query.page) {
-      const numTours = Tour.countDocuments();
-      if (skip >= numTours) {
-        throw new Error('This page does not exist!');
-      }
-    }
-
-    const tours = await query;
+    const features = new APIQuery(Tour.find(), req.query)
+      .filter()
+      .sort()
+      .limitFields()
+      .paginate();
+    const tours = await features.query;
 
     res.status(200).json({
       status: 'success',
