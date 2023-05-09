@@ -71,7 +71,7 @@ const tourSchema = new mongoose.Schema(
     createdAt: {
       type: Date,
       default: Date.now(),
-      select: false
+      select: false // this is for field limiting
     },
     startDates: [Date],
     secretTour: {
