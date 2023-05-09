@@ -1,14 +1,17 @@
 const Tour = require('../models/tourModel');
-
+const { removeReservedQueryVals } = require('../utils/common');
 // const tours = JSON.parse(
 //   fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`)
 // );
 
 exports.getAllTours = async (req, res) => {
   try {
-    console.log(req.requestTime);
-
-    const tours = await Tour.find();
+    const queryObj = removeReservedQueryVals({ ...req.query });
+    // Note to self:  <collection_schema>.find always returns the Query Object
+    // so u can cahin any other Query methods defined on the query prototypes
+    // BUt when u do await , it executes that query
+    const query = Tour.find(queryObj);
+    const tours = await query;
 
     res.status(200).json({
       status: 'success',
