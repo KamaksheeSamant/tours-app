@@ -140,7 +140,7 @@ exports.deleteTour = async (req, res) => {
     });
   }
 };
-
+// using aggregators
 exports.getToursStatistics = async (req, res) => {
   try {
     const stats = await Tour.aggregate([
@@ -184,7 +184,7 @@ exports.getToursStatistics = async (req, res) => {
     });
   }
 };
-
+// using aggregator
 exports.getMonthlyPlan = async (req, res) => {
   try {
     const year = req.params.year * 1; // 2021
