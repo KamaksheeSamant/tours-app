@@ -1,6 +1,7 @@
 const express = require('express');
 const morgan = require('morgan');
 // const { MongoClient, ServerApiVersion } = require('mongodb');
+const AppError = require('./utils/appError');
 
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
@@ -29,4 +30,11 @@ app.use((req, res, next) => {
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 
+// all the unknow routes needs to eb handled here
+app.all('*', (req, res, next) => {
+  res.status(404).json({
+    status: 'fail',
+    message: 'Could not find the route'
+  });
+});
 module.exports = app;
