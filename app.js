@@ -32,9 +32,30 @@ app.use('/api/v1/users', userRouter);
 
 // all the unknow routes needs to eb handled here
 app.all('*', (req, res, next) => {
-  res.status(404).json({
-    status: 'fail',
-    message: 'Could not find the route'
+  // res.status(404).json({
+  //   status: 'fail',
+  //   message: 'Could not find the route'
+  // });
+  // const error = new Error('Count not find the route');
+  // error.status = 'fail';
+  // error.statusCode = 404;
+
+  const error = new AppError('Count not find the route', 404);
+  next(error); // using next with arg means exp will know that there is an err and will call ur err middlewareß
+});
+// to tell express that this is a err handling middle ware functio
+// pass 4 args err, req, res, next
+// at the very end ( as middle ware calls sequesce is as they are defined)
+app.use((error, _req, res, _next) => {
+  error.statusCode = error.statusCode || '500'; // internal server down code
+  error.status = error.status || 'error';
+  res.status(error.statusCode).json({
+    status: error.status,
+    message: error.message
   });
 });
+
+// NOT: if you are passing any val to next , express will consider it as an err and skip all other stpes
+// global err handling middleware
+
 module.exports = app;
